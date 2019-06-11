@@ -8,8 +8,11 @@ local test_context = function()
     ctx:MakeComponent("Moving", {flag = true})
     ctx:MakeComponent("RoundTurn", {unique = true})
     --唯一组件
-    ctx.RoundTurn.state = 2
-    assert(ctx.RoundTurn.state == 2)
+    local turn = ctx.unique:RoundTurn()
+    turn.state = 2
+    ctx.unique:ReplaceRoundTurn(turn)
+    assert(ctx.unique:RoundTurn().state == 2)
+
     --创建entity
     local e = ctx:CreateEntity()
     local mt = getmetatable(e)
@@ -38,7 +41,9 @@ local test_context = function()
     --group
     local g = ctx:GetGroup(Matcher:New({ctx.Role}, {ctx.Position}, {}))
     --collector
-    local c = Collector:New({g}, {"Added"})
+    local c1 = Collector:New({g}, {"Added"})
+    -- role added or position removed
+    local c2 = ctx:CreateCollector(Test1Matcher.Role:Added(), Test1Matcher.Position:Removed())
 end
 
 test_context()
@@ -55,7 +60,7 @@ test_context()
 _class("TimeSystem")
 
 function TimeSystem:Constructor(context)
-    self._entity = context:UniqueEntity()
+    self._entity = context.unique
 end
 
 function TimeSystem:Execute()
@@ -68,7 +73,7 @@ end
 
 _class("TimerSystem")
 function TimerSystem:Constructor(context)
-    self._time = context:UniqueEntity():Time()
+    self._time = context.unique:Time()
     self._group = context:GetGroup(Test2Matcher.Timer)
 end
 
@@ -116,8 +121,8 @@ function test_systems()
     local e2 = ctx:CreateEntity()
 
     --e1:AddTimer({last = os.clock(), delta = 0})
-    ctx:UniqueEntity():Time().delta = 0
-    ctx:UniqueEntity():Time().last = os.clock()
+    ctx.unique:Time().delta = 0
+    ctx.unique:Time().last = os.clock()
 
     e1:AddID({id = 1})
     e1:AddTimer({timeout = 2, acc = 0}) --e1每2秒timeout一次

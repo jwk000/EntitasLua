@@ -47,3 +47,17 @@ function Matcher:Matches(entity)
         (anyOfIndices == nil or #anyOfIndices == 0 or entity:HasAnyComponent(anyOfIndices)) and
         (noneOfIndices == nil or #anyOfIndices == 0 or not entity:HasAnyComponent(noneOfIndices))
 end
+
+
+function Matcher:Added()
+    return {self,"Added"}
+end
+
+function Matcher:Removed()
+    return {self, "Removed"}
+end
+
+function Matcher:AddedOrRemoved()
+    return {self, "AddedOrRemoved"}
+end
+

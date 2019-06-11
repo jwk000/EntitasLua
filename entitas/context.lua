@@ -21,7 +21,7 @@ function Context:Constructor(ctxname)
     --key:name value:entityindex
     self._entityIndices = {}
     --unique entity
-    self._uniqueEntity = self:CreateEntity()
+    self.unique = self:CreateEntity()
 
     self.Ev_OnEntityCreated = DelegateEvent:New()
     self.Ev_OnEntityWillBeDestroyed = DelegateEvent:New()
@@ -40,10 +40,6 @@ end
 
 function Context:TotalComponents()
     return self._componentIndex
-end
-
-function Context:UniqueEntity()
-    return self._uniqueEntity
 end
 
 function Context:insertEntity(entity)
@@ -255,7 +251,7 @@ end
 
 function Context:ExtendUniqueComponent(name)
     local c = self[name]
-    local e = self._uniqueEntity
+    local e = self.unique
    
     if e:HasComponent(c._index) then
         error('unique component '..name ..'already exsited')
@@ -278,7 +274,7 @@ end
 
 function Context:ExtendUniqueFlagComponent(name)
     local c = self[name]
-    local e = self._uniqueEntity
+    local e = self.unique
    
     if e:HasComponent(c._index) then
         error('unique component '..name ..'already exsited')
@@ -366,4 +362,14 @@ function Context:MakeComponent(name, options)
     if options and options.entityindex then
         self:ExtendEntityIndex(name, options.entityindex)
     end
+end
+
+function Context:CreateCollector(...)
+    local groups={}
+    local events={}
+    for i,v in ipairs({...}) do
+        table.insert(groups, self:GetGroup(v[1]))
+        table.insert(events, v[2])
+    end
+    return Collector:New(groups, events)
 end
